@@ -1,0 +1,420 @@
+<html>
+  <head>
+    <title>Traffic Data Viz</title>
+
+
+     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">   
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="index.css">
+    <script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.0/mapbox-gl.js"></script>
+    <!--<script src="https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js"></script>
+	<link href="https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css" rel="stylesheet" /> for basemaps maybe !-->
+    <script src="timeline-v3.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    
+    <script src="https://www.amcharts.com/lib/3/amcharts.js"></script>
+    <script src="https://www.amcharts.com/lib/3/serial.js"></script>
+    <script src="https://www.amcharts.com/lib/3/themes/dark.js"></script>
+    <style type="text/css">
+      .dropdown:hover>.dropdown-menu {
+          display: block;
+      }
+      .radiobuttons{
+        padding: 5px;
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <div class="container panel">
+      <div class="row">
+
+        <div class="col-lg-6 col-md-12">
+          <h5 class="text-center border-bottom border-white"><b>Traffic Variable</b></h5>
+          <div class="radiobuttons">
+            <div class="radio">
+              <label><input type="radio" name="variableRadio" value="ttiSelected" checked> Travel Time Index</label>
+            </div>
+            <div class="radio">
+              <label><input type="radio" name="variableRadio" value="speedSelected" > Average Speed</label>
+            </div> 
+          </div>
+        </div>
+
+        <div class="col-lg-6 col-md-12 border-left border-white">
+           <h5 class="text-center border-bottom border-white"><b>Spatial Resolution</b></h5>
+          <div class="radiobuttons">
+            <div class="radio">
+              <label><input type="radio"  name="spatioradio" value="route"> Route</label>
+            </div>
+            <div class="radio">
+              <label><input type="radio" name="spatioradio" value="section" > Section</label>
+            </div>
+            <div class="radio disabled">
+              <label><input type="radio" name="spatioradio" value="segment"  checked> Segment</label>
+            </div>
+            <!--<p class="mb-0 mt-1 border-white border-bottom text-center">Direction</p>
+            <div class="radio">
+              <label class="radio-inline"><input type="radio"  name="direction" value="TRUE"  >TRUE </label>
+            
+              <label class="radio-inline"><input type="radio" name="direction" value="FALSE" checked >FALSE </label>
+            </div>-->
+          </div>
+        </div>
+
+        <div class="col-lg-6 col-md-12">
+          <h5 class="text-center border-bottom border-white"><b>Visualization Style</b></h5>
+          <div class="radiobuttons">
+            <div class="radio">
+              <label><input type="radio" name="typeRadio" value="colorSelected" checked> Color (Diverging)</label>
+            </div>
+            <div class="radio">
+              <label><input type="radio" name="typeRadio" value="color2Selected" > Color (Sequential)</label>
+            </div>
+            <div class="radio">
+              <label><input type="radio" name="typeRadio" value="widthSelected" > Width</label>
+            </div>
+            <div class="radio">
+              <label><input type="radio" name="typeRadio" value="bothSelected" > Color (Div) & Width</label>
+            </div>
+            <div class="radio">
+              <label><input type="radio" name="typeRadio" value="both2Selected" > Color (Seq) & Width</label>
+            </div>
+            
+          </div>
+        </div>
+
+        <div class="col-lg-6 col-md-12 border-left border-white">
+          <h5 class="text-center border-bottom border-white"><b>Temporal Resolution</b></h5>
+          <div class="radiobuttons">
+            <div class="radio">
+              <label><input type="radio" name="optradio" value="yearly" > Yearly</label>
+            </div>
+             <div class="radio">
+              <label><input type="radio" name="optradio" value="monthly" > Monthly</label>
+            </div>
+            <div class="radio">
+              <label><input type="radio" name="optradio" value="daily" checked> Daily</label>
+            </div>
+            <div class="radio">
+              <label><input type="radio" name="optradio" value="hourly" > Hourly</label>
+            </div>
+            <div class="radio disabled">
+              <label><input type="radio" name="optradio" value="15min" > 15 min</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12">
+        <hr>
+        <div id="calendar">
+        <p>Date: <input type="text" id="datepicker"></p>
+      </div>
+          <div id="dateSlider"></div>
+
+          <div id="timeSliderContainer">
+            <p > <span id="something"></span> hour</p>
+            <div id="timeSlider">
+            </div>
+          </div>
+
+          <div id="year-month" style="display: none;">
+            <div id="yearSelector">
+              <div class="form-group">
+                <label for="year-value">Select Year:</label>
+                <select class="form-control" id="year-value">
+                  <option value="2019">2019</option>
+                  <option value="2018">2018</option>
+                  <option value="2017">2017</option>
+                </select>
+              </div>
+            </div>
+            <div id="monthSelector">
+              <div class="form-group">
+                <label for="sel1">Select Month:</label>
+                <select class="form-control" id="month-value">
+                  <option  value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                  <option value="6">6</option>
+                  <option value="7">7</option>
+                  <option value="8">8</option>
+                  <option value="9">9</option>
+                  <option value="10">10</option>
+                  <option value="11">11</option>
+                  <option value="12">12</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div id="tooltip"></div>   
+      </div>
+  </div>
+          <div class="row w-100 h-30 graph-panel" >
+            <button class="btn btn-info btn-sm" onclick="closeGraph()">X</button>
+            <div id="chartdiv" ></div>
+            
+          </div>
+    <!-- </div> -->
+
+    <!--<div class="layout">
+    	<div class="legend" style="background:rgb(102,189,99);width:10%"></div>
+    	<div class="legend" style="background:rgb(166,217,106);width:10%"></div>
+    	<div class="legend" style="background:rgb(217,239,139);width:10%"></div>
+    	<div class="legend" style="background:rgb(255,255,191);width:10%"></div>
+    	<div class="legend" style="background:rgb(254,224,139);width:10%"></div>
+    	<div class="legend" style="background:rgb(253,174,97);width:10%"></div>
+
+   	<p class="layout1">
+    		<span style="width:10%">0</span>
+    		<span style="width:10%">4</span>
+    		<span style="width:10%">8</span>
+    		<span style="width:10%">12</span>
+    		<span style="width:10%">20</span>
+    		<span style="width:10%">32</span>
+    		<span style="width:10%">52</span>
+    	</p>
+    </div> -->
+
+	 <div class="layout">
+    <div class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle btn " type="button" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Basemaps
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+         <div class="radiobuttons">
+            <div class="radio">
+              <label><input type="radio" name="bmapRadio" value="dark" checked>Dark</label>
+            </div>
+            <div class="radio">
+              <label><input type="radio" name="bmapRadio" value="light" >Light</label>
+            </div>
+            <!--<div class="radio">
+              <label><input type="radio" name="bmapRadio" value="streets" >Streets</label>
+            </div>
+            <div class="radio">
+              <label><input type="radio" name="bmapRadio" value="outdoors" >Outdoors</label>
+            </div>
+            <div class="radio">
+              <label><input type="radio" name="bmapRadio" value="navigationm" >NavigationM</label>
+            </div>-->
+            <div class="radio">
+              <label><input type="radio" name="bmapRadio" value="satellite" >Satellite</label>
+            </div>
+            <div class="radio">
+              <label><input type="radio" name="bmapRadio" value="navigationn" >NavigationN</label>
+            </div>
+          </div>
+        </div>
+      </div>
+	 <div>
+    <button class="button button2">Description</button>
+    <!--<h6>...Short Description...</h6>-->
+	 	<div class="layout1 legend-1" >
+	 		<div class="legend" style="background-color:rgba(26,26,25,0.9);width:25%"></div>
+	 		<div class="legend" style="background:rgb( 26,152, 80);width:25%"></div>
+	 		<div class="legend" style="background:rgb(145,207, 96);width:25%"></div>
+	 		<div class="legend" style="background:rgb(217,239,139);width:25%"></div>
+	 		<div class="legend" style="background:rgb(254,224,139);width:25%"></div>
+	 		<div class="legend" style="background:rgb(252,141, 89);width:25%"></div>
+	 		<div class="legend" style="background:rgb(215, 48, 39);width:25%"></div>
+	 	</div>
+	 	<p class="layout2 legend-1"  >
+	 		<span style="width:30%">N/A</span>
+	 		<span style="width:30%">1.25</span>
+	 		<span style="width:30%">1.5</span>
+	 		<span style="width:25%">1.75</span>
+	 		<span style="width:25%">2</span>
+	 		<span style="width:25%">2.5</span>
+	 		<span style="width:30%">>2.5</span>
+	 	</p>
+
+	 	<div class="layout1 legend-2">
+	 		<div class="legend" style="background-color:rgba(26,26,25,0.9);width:25%"></div>
+	 		<div class="legend" style="background:rgb(215, 48, 39);width:25%"></div>
+      <div class="legend" style="background:rgb(252, 141,89);width:25%"></div>
+      <div class="legend" style="background:rgb(254,224,139);width:25%"></div>
+      <div class="legend" style="background:rgb(217,239,139);width:25%"></div>
+      <div class="legend" style="background:rgb(145,207, 96);width:25%"></div>
+      <div class="legend" style="background:rgb( 26,152, 80);width:25%"></div>
+	 	</div>
+	 	<p class="layout2 legend-2">
+	 		<span style="width:30%">N/A</span>
+	 		<span style="width:25%">10</span>
+	 		<span style="width:30%">20</span>
+	 		<span style="width:25%">30</span>
+	 		<span style="width:30%">40</span>
+	 		<span style="width:25%">50</span>
+	 		<span style="width:30%">>50</span>
+	 	</p>
+
+	 	<div class="layout1 legend-3">
+	 		<div class="legend" style="background-color:rgba(26,26,25,0.9);width:25%"></div>
+	 		<div class="legend" style="background:rgb(241,238,246);width:25%"></div>
+	 		<div class="legend" style="background:rgb(212,185,218);width:25%"></div>
+	 		<div class="legend" style="background:rgb(201,148,199);width:25%"></div>
+	 		<div class="legend" style="background:rgb(223,101,176);width:25%"></div>
+	 		<div class="legend" style="background:rgb(221, 28,119);width:25%"></div>
+	 		<div class="legend" style="background:rgb(152,  0, 67);width:25%"></div>
+	 	</div>
+	 	<p class="layout2 legend-3">
+      <span style="width:30%">N/A</span>
+      <span style="width:30%">1.25</span>
+      <span style="width:30%">1.5</span>
+      <span style="width:25%">1.75</span>
+      <span style="width:25%">2</span>
+      <span style="width:25%">2.5</span>
+      <span style="width:30%">>2.5</span>
+	 	</p>
+
+	 	<div class="layout1  legend-4">
+	 		<div class="legend" style="background-color:rgba(26,26,25,0.9);width:25%"></div>
+      <div class="legend" style="background:rgb(152,  0, 67);width:25%"></div>
+      <div class="legend" style="background:rgb(221, 28,119);width:25%"></div>
+      <div class="legend" style="background:rgb(223,101,176);width:25%"></div>
+      <div class="legend" style="background:rgb(201,148,199);width:25%"></div>
+      <div class="legend" style="background:rgb(212,185,218);width:25%"></div>
+	 		<div class="legend" style="background:rgb(241,238,246);width:25%"></div>
+	 	</div>
+	 	<p class="layout2 legend-4">
+      <span style="width:30%">N/A</span>
+      <span style="width:25%">10</span>
+      <span style="width:30%">20</span>
+      <span style="width:25%">30</span>
+      <span style="width:30%">40</span>
+      <span style="width:25%">50</span>
+      <span style="width:30%">>50</span>
+	 	</p>
+
+	 	<div class="layout1 legend-5">
+	 		<div class="legend" style="background:rgb(254,224,139);width:25%;height:10%;vertical-align: middle"></div>
+	 		<div class="legend" style="background:rgb(254,224,139);width:25%;height:25%;vertical-align: middle"></div>
+	 		<div class="legend" style="background:rgb(254,224,139);width:25%;height:40%;vertical-align: middle"></div>
+	 		<div class="legend" style="background:rgb(254,224,139);width:25%;height:55%;vertical-align: middle"></div>
+	 		<div class="legend" style="background:rgb(254,224,139);width:25%;height:70%;vertical-align: middle"></div>
+	 		<div class="legend" style="background:rgb(254,224,139);width:25%;height:85%;vertical-align: middle"></div>
+	 		<div class="legend" style="background:rgb(254,224,139);width:25%;height:100%;vertical-align: middle"></div>
+	 	</div>
+	 	<p class="layout2 legend-5">
+      <span style="width:30%">N/A</span>
+      <span style="width:30%">1.25</span>
+      <span style="width:30%">1.5</span>
+      <span style="width:25%">1.75</span>
+      <span style="width:25%">2</span>
+      <span style="width:25%">2.5</span>
+      <span style="width:30%">>2.5</span>
+	 	</p>
+
+	 	<div class="layout1 legend-6">
+      <div class="legend" style="background:rgb(254,224,139);width:25%;height:100%;vertical-align: middle"></div>
+      <div class="legend" style="background:rgb(254,224,139);width:25%;height:85%;vertical-align: middle"></div>
+      <div class="legend" style="background:rgb(254,224,139);width:25%;height:70%;vertical-align: middle"></div>
+      <div class="legend" style="background:rgb(254,224,139);width:25%;height:55%;vertical-align: middle"></div>
+      <div class="legend" style="background:rgb(254,224,139);width:25%;height:40%;vertical-align: middle"></div>
+      <div class="legend" style="background:rgb(254,224,139);width:25%;height:25%;vertical-align: middle"></div>
+      <div class="legend" style="background:rgb(254,224,139);width:25%;height:10%;vertical-align: middle"></div>
+	 	</div>
+	 	<p class="layout2 legend-6">
+      <span style="width:30%">10</span>
+      <span style="width:25%">20</span>
+      <span style="width:30%">30</span>
+      <span style="width:25%">40</span>
+      <span style="width:30%">50</span>
+      <span style="width:25%">>50</span>
+      <span style="width:25%">N/A</span>
+	 	</p>
+
+    <div class="layout1 legend-7">
+      <div class="legend" style="background-color:rgba(26,26,25,0.9);width:25%;height:10%;vertical-align: middle"></div>
+      <div class="legend" style="background:rgb(26,152,80);width:25%;height:25%;vertical-align: middle"></div>
+      <div class="legend" style="background:rgb(145,207,96);width:25%;height:40%;vertical-align: middle"></div>
+      <div class="legend" style="background:rgb(217,239,139);width:25%;height:55%;vertical-align: middle"></div>
+      <div class="legend" style="background:rgb(254,224,139);width:25%;height:70%;vertical-align: middle"></div>
+      <div class="legend" style="background:rgb(252,141,89);width:25%;height:85%;vertical-align: middle"></div>
+      <div class="legend" style="background:rgb(215,48,39);width:25%;height:100%;vertical-align: middle"></div>
+    </div>
+    <p class="layout2 legend-7">
+      <span style="width:30%">N/A</span>
+      <span style="width:30%">1.25</span>
+      <span style="width:30%">1.5</span>
+      <span style="width:25%">1.75</span>
+      <span style="width:25%">2</span>
+      <span style="width:25%">2.5</span>
+      <span style="width:30%">>2.5</span>
+    </p>
+
+    <div class="layout1 legend-8">
+      <div class="legend" style="background:rgb(215, 48, 39);width:25%;height:100%;vertical-align: middle"></div>
+      <div class="legend" style="background:rgb(252, 141,89);width:25%;height:85%;vertical-align: middle"></div>
+      <div class="legend" style="background:rgb(254,224,139);width:25%;height:70%;vertical-align: middle"></div>
+      <div class="legend" style="background:rgb(217,239,139);width:25%;height:55%;vertical-align: middle"></div>
+      <div class="legend" style="background:rgb(145,207, 96);width:25%;height:40%;vertical-align: middle"></div>
+      <div class="legend" style="background:rgb( 26,152, 80);width:25%;height:25%;vertical-align: middle"></div>
+      <div class="legend" style="background-color:rgba(26,26,25,0.9);width:25%;height:10%;vertical-align: middle"></div>
+    </div>
+    <p class="layout2 legend-8">
+      <span style="width:30%">10</span>
+      <span style="width:25%">20</span>
+      <span style="width:30%">30</span>
+      <span style="width:25%">40</span>
+      <span style="width:30%">50</span>
+      <span style="width:25%">>50</span>
+      <span style="width:25%">N/A</span>
+    </p>
+
+    <div class="layout1 legend-9">
+      <div class="legend" style="background-color:rgba(26,26,25,0.9);width:25%;height:10%;vertical-align: middle"></div>
+      <div class="legend" style="background:rgb(241,238,246);width:25%;height:25%;vertical-align: middle"></div>
+      <div class="legend" style="background:rgb(212,185,218);width:25%;height:40%;vertical-align: middle"></div>
+      <div class="legend" style="background:rgb(201,148,199);width:25%;height:55%;vertical-align: middle"></div>
+      <div class="legend" style="background:rgb(223,101,176);width:25%;height:70%;vertical-align: middle"></div>
+      <div class="legend" style="background:rgb(221, 28,119);width:25%;height:85%;vertical-align: middle"></div>
+      <div class="legend" style="background:rgb(152,  0, 67);width:25%;height:100%;vertical-align: middle"></div>
+    </div>
+    <p class="layout2 legend-9">
+      <span style="width:30%">N/A</span>
+      <span style="width:30%">1.25</span>
+      <span style="width:30%">1.5</span>
+      <span style="width:25%">1.75</span>
+      <span style="width:25%">2</span>
+      <span style="width:25%">2.5</span>
+      <span style="width:30%">>2.5</span>
+    </p>
+
+    <div class="layout1 legend-10">
+      <div class="legend" style="background:rgb(152,  0, 67);width:25%;height:100%;vertical-align: middle"></div>
+      <div class="legend" style="background:rgb(221, 28,119);width:25%;height:85%;vertical-align: middle"></div>
+      <div class="legend" style="background:rgb(223,101,176);width:25%;height:70%;vertical-align: middle"></div>
+      <div class="legend" style="background:rgb(201,148,199);width:25%;height:55%;vertical-align: middle"></div>
+      <div class="legend" style="background:rgb(212,185,218);width:25%;height:40%;vertical-align: middle"></div>
+      <div class="legend" style="background:rgb(241,238,246);width:25%;height:25%;vertical-align: middle"></div>
+      <div class="legend" style="background-color:rgba(26,26,25,0.9);width:25%;height:10%;vertical-align: middle"></div>
+    </div>
+    <p class="layout2 legend-10">
+      <span style="width:30%">10</span>
+      <span style="width:25%">20</span>
+      <span style="width:30%">30</span>
+      <span style="width:25%">40</span>
+      <span style="width:30%">50</span>
+      <span style="width:25%">>50</span>
+      <span style="width:25%">N/A</span>
+    </p>
+	 		<p>Data source:<a href="https://www.salzburgresearch.at/"> Salzburg Research</a></p>
+	 	</div>
+	 </div>
+
+  </body>
+
+  <script type="text/javascript" src="map24thAug.js" ></script>
+</html>
