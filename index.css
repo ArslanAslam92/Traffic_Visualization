@@ -38,13 +38,15 @@
       }
 
       .panel{
+        font-size: 14px;
         z-index: 9999;
         position: absolute;
-        width: 30%;
+        width: 21%;
         height: 70%;
         background: #080124;
         top: 10px;
         left: 10px;
+        padding-top: 5px;
         color: #9f9f9f;
         overflow-y: auto;
         border-radius: 15px;
@@ -131,6 +133,10 @@ input:checked + .slider:before {
 
 input {
     overflow: visible;
+}
+
+input[type=radio] {
+  font-size: 10px;
 }
 
 input[type=range] {
@@ -251,7 +257,7 @@ input[type=range]:focus::-ms-fill-upper {
   width: 100%;
 }
 .ui-datepicker-header {
-  background: url('../img/dark_leather.png') repeat 0 0 #000;
+  background:#000;
   color: #e0e0e0;
   font-weight: bold;
   -webkit-box-shadow: inset 0px 1px 1px 0px rgba(250, 250, 250, 2);
@@ -427,6 +433,16 @@ input[type=range]:focus::-ms-fill-upper {
     line-height : 15px;
     margin-top: 5px; 
     height: 20px;
+    vertical-align: middle;
+    align-items: center;
+    justify-content: center;
+}
+
+.layout3{
+    text-align: center;
+    margin: 0px;
+    padding: 0px;
+    font-size: 12px;
     vertical-align: middle;
     align-items: center;
     justify-content: center;

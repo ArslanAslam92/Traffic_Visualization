@@ -9,13 +9,16 @@ let allRoutesData = [];
 let filteredData = [];   // applies getkey and saves
 let yearChange = 0;
 let monthChange = 0;
+let dateSlider = "FALSE";
+let currentSelectedSpatial = "Segment";
 
 let roadDirection  = "FALSE";
 $( function() {
+  // $("#datepicker").datepicker();
   $( "#datepicker" ).datepicker({ 
   // minDate: new Date(2019, 6 - 1, 01), 
   // maxDate: new Date(2019, 6 - 1, 30) ,
-  defaultDate: new Date('1 June 2019'),
+  // defaultDate: new Date('1 June 2019'),
   onSelect: function(dateText) {
     console.log("Selected date: " + dateText + "; input's current value: " + this.value);
     
@@ -32,7 +35,8 @@ $( function() {
 }).on('change', function(){
   console.log("DATE CHANGED");
 });
-// $('#dateselector').datepicker("setDate", new Date(2008,9,03) );
+// .datepicker('setDate', date);
+ $('#datepicker').datepicker("setDate", new Date('1 June 2019'));
 
 var handle = $( "#custom-handle" );
 $( "#timeSlider" ).slider({
@@ -133,7 +137,7 @@ changelegend();
 
 $('input[type=radio][name=optradio]').change(function() {
   if (this.value == 'daily') {
-  // $("#datepicker").datepicker();
+  
   // $('#dateselector').datepicker("setDate", new Date('1 June 2019'));
   //$('#datepicker').show();
   $('#calendar').show();
@@ -141,10 +145,28 @@ $('input[type=radio][name=optradio]').change(function() {
   $('#timeSliderContainer').hide();
   $('#year-month').hide();
 
-  $('#datePicker').datepicker('setDate', new Date('1 June 2019'));
-  timestamp = "20190601";
+  // $('#datePicker').datepicker('setDate', new Date('1 June 2019'));
+  let currentDate = $("#datepicker").datepicker("getDate");
+    var formatted = $.datepicker.formatDate('yymmdd', currentDate);
+    console.log(formatted);
+    timestamp = formatted;
+  // timestamp = "20190601";
   //roadDirection = $('input[type="radio"][name="direction"]:checked').val();
   roadDirection = "FALSE";
+  if($('input[type="radio"][name="spatioradio"]:checked').val() == 'route'){
+    loadRouteData();
+    spatialLayer = 2;
+  }
+  else if($('input[type="radio"][name="spatioradio"]:checked').val() == 'segment'){
+    loadSegmentData();
+    spatialLayer = 0;
+
+  }
+  else if($('input[type="radio"][name="spatioradio"]:checked').val() == 'section'){
+    loadSectionData();
+    spatialLayer = 1;
+  }
+  console.log(timestamp);
   filterData(timestamp);
   redraw();
     // alert("DAILY");
@@ -173,7 +195,6 @@ $('input[type=radio][name=optradio]').change(function() {
     $('#year-month').show();
     $('#yearSelector').show();
     $('#monthSelector').hide();
-    loadSegmentData();
   }
   else if(this.value == 'monthly'){
     //$('#datepicker').hide();
@@ -183,10 +204,25 @@ $('input[type=radio][name=optradio]').change(function() {
     $('#year-month').show();
     $('#yearSelector').show();
     $('#monthSelector').show();
-    loadSegmentData();
-  }
-  else{
+    // loadSegmentData();
 
+    // let spatailLayerSelector = $('input[type="radio"][name="spatioradio"]:checked');
+    
+   
+  }
+ 
+  if($('input[type="radio"][name="spatioradio"]:checked').val() == 'route'){
+    loadRouteData();
+    spatialLayer = 2;
+  }
+  else if($('input[type="radio"][name="spatioradio"]:checked').val() == 'segment'){
+    loadSegmentData();
+    spatialLayer = 0;
+
+  }
+  else if($('input[type="radio"][name="spatioradio"]:checked').val() == 'section'){
+    loadSectionData();
+    spatialLayer = 1;
   }
 });
 
@@ -249,15 +285,18 @@ $('input[type=radio][name=spatioradio]').change(function() {
   if(this.value == 'route'){
     loadRouteData();
     spatialLayer = 2;
+    currentSelectedSpatial = "Route";
   }
   else if(this.value == 'segment'){
     loadSegmentData();
     spatialLayer = 0;
+    currentSelectedSpatial = "Segment";
 
   }
   else if(this.value == 'section'){
     loadSectionData();
     spatialLayer = 1;
+    currentSelectedSpatial = "Section";
   }
   //else{
   //  spatialLayer = 1;
@@ -362,7 +401,7 @@ var deckgl = new deck.DeckGL({
   initialViewState: {
     longitude: 13.0385674,
     latitude: 47.8243466,
-    zoom: 12,
+    zoom: 13,
     pitch: 0,
     minZoom: 2,
     maxZoom: 18
@@ -382,6 +421,12 @@ loadSegmentData();
 
 function loadSegmentData(){
   console.log('LOAD SEGMENT');
+  let currentDate = $("#datepicker").datepicker("getDate");
+  console.log(currentDate);
+  var formatted = $.datepicker.formatDate('yymmdd', currentDate);
+  console.log(formatted);
+  dateSelected = formatted;
+  console.log(dateSelected);
 
   // d3.csv('https://raw.githubusercontent.com/ArslanAslam92/files/master/june19tti.csv')
   console.log($('input[type="radio"][name="optradio"]:checked').val());
@@ -412,10 +457,14 @@ function loadSegmentData(){
       allRoutesData = data;
       const unique = [...new Set(data.map(item => item.timestamp))];
       timestamp = data[0].timestamp;
-      initTimeSlider(d3.select('#dateSlider'));
+      if(dateSlider == "FALSE"){
+        initTimeSlider(d3.select('#dateSlider'));
+        dateSlider = "TRUE";
+      }
       //roadDirection = $('input[type="radio"][name="direction"]:checked').val();
       roadDirection = "FALSE";
-      filterData('20190601');
+      
+      filterData(dateSelected);
       redraw();
     });
   }
@@ -423,6 +472,11 @@ function loadSegmentData(){
 }
 
 function loadRouteData(){
+  let currentDate = $("#datepicker").datepicker("getDate");
+  var formatted = $.datepicker.formatDate('yymmdd', currentDate);
+  console.log(formatted);
+  dateSelected = formatted;
+
   console.log('LOAD ROUTE');
   console.log($('input[type="radio"][name="optradio"]:checked').val());
   if($('input[type="radio"][name="optradio"]:checked').val() == 'yearly' || $('input[type="radio"][name="optradio"]:checked').val() == 'monthly'){
@@ -448,10 +502,13 @@ function loadRouteData(){
       allRoutesData = data;
       const unique = [...new Set(data.map(item => item.timestamp))];
       timestamp = data[0].timestamp;
-      initTimeSlider(d3.select('#dateSlider'));
+      if(dateSlider == "FALSE"){
+        initTimeSlider(d3.select('#dateSlider'));
+        dateSlider = "TRUE";
+      }
       //roadDirection = $('input[type="radio"][name="direction"]:checked').val();
       roadDirection = "FALSE";
-      filterData('20190601');
+      filterData(dateSelected);
       redraw();
     });
   }
@@ -459,6 +516,10 @@ function loadRouteData(){
 
 function loadSectionData(){
   console.log('LOAD SECTION');
+  let currentDate = $("#datepicker").datepicker("getDate");
+  var formatted = $.datepicker.formatDate('yymmdd', currentDate);
+  console.log(formatted);
+  dateSelected = formatted;
   if($('input[type="radio"][name="optradio"]:checked').val() == 'yearly' || $('input[type="radio"][name="optradio"]:checked').val() == 'monthly'){
     console.log("inYearly");
     $('#year-month').show();
@@ -482,10 +543,14 @@ function loadSectionData(){
       allRoutesData = data;
       const unique = [...new Set(data.map(item => item.timestamp))];
       timestamp = data[0].timestamp;
-      initTimeSlider(d3.select('#dateSlider'));
+      if(dateSlider == "FALSE"){
+        initTimeSlider(d3.select('#dateSlider'));
+        dateSlider = "TRUE";
+      }
       //roadDirection = $('input[type="radio"][name="direction"]:checked').val();
       roadDirection = "FALSE";
-      filterData('20190601');
+      
+      filterData(dateSelected);
       redraw();
     });
   }
@@ -1026,6 +1091,10 @@ function filterData(date){
   console.log(date);
   console.log(allRoutesData);
   console.log(roadDirection);
+  if(date == null || date == ""){
+    date = "20190601";
+  }
+  console.log(date);
   if($('input[type="radio"][name="spatioradio"]:checked').val() == 'section'){
     filteredData = allRoutesData.filter(function (el) {
       return el.timestamp == date;
@@ -1220,31 +1289,31 @@ function getDataForGraph(key){
         currentFeatureData = allRoutesData.filter(function (el) {
           return el.route_id == key && el.direction_1 == roadDirection && el.month == 0;
         });
-        drawYearlyGraph(currentFeatureData);
+        drawYearlyGraph(currentFeatureData,key);
       }
       else if($('input[type="radio"][name="optradio"]:checked').val()  == 'monthly'){
         currentFeatureData = allRoutesData.filter(function (el) {
           return el.route_id == key && el.year == $('#year-value').val() && el.direction_1 == roadDirection && el.month != 0;
         });
-        drawMonthlyGraph(currentFeatureData);
+        drawMonthlyGraph(currentFeatureData,key);
       }
       else if($('input[type="radio"][name="optradio"]:checked').val()  == 'daily'){
         currentFeatureData = allRoutesData.filter(function (el) {
           return el.route_id == key && el.direction_1 == roadDirection;
         });
-        drawDailyGraph(currentFeatureData);
+        drawDailyGraph(currentFeatureData,key);
       }
       else if($('input[type="radio"][name="optradio"]:checked').val()  == 'hourly'){
          currentFeatureData = filteredData.filter(function (el) {
           return el.route_id == key 
         });
-        drawHourlyGraph(currentFeatureData[0]);
+        drawHourlyGraph(currentFeatureData[0],key);
       }
       else{
         currentFeatureData = filteredData.filter(function (el) {
           return el.route_id == key 
         });
-        drawGraph(currentFeatureData[0]);
+        drawGraph(currentFeatureData[0],key);
       }
     }
 
@@ -1253,31 +1322,31 @@ function getDataForGraph(key){
         currentFeatureData = allRoutesData.filter(function (el) {
           return el.section_id == key && el.direction_1 == roadDirection && el.month == 0;
         });
-        drawYearlyGraph(currentFeatureData);
+        drawYearlyGraph(currentFeatureData,key);
       }
       else if($('input[type="radio"][name="optradio"]:checked').val()  == 'monthly'){
         currentFeatureData = allRoutesData.filter(function (el) {
           return el.section_id == key && el.year == $('#year-value').val() && el.direction_1 == roadDirection && el.month != 0;
         });
-        drawMonthlyGraph(currentFeatureData);
+        drawMonthlyGraph(currentFeatureData,key);
       }
       else if($('input[type="radio"][name="optradio"]:checked').val()  == 'daily'){
         currentFeatureData = allRoutesData.filter(function (el) {
           return el.section_id == key && el.direction_1 == roadDirection;
         });
-        drawDailyGraph(currentFeatureData)
+        drawDailyGraph(currentFeatureData,key)
       }
       else if($('input[type="radio"][name="optradio"]:checked').val()  == 'hourly'){
          currentFeatureData = filteredData.filter(function (el) {
           return el.section_id == key 
         });
-        drawHourlyGraph(currentFeatureData[0]);
+        drawHourlyGraph(currentFeatureData[0],key);
       }
       else{
         currentFeatureData = filteredData.filter(function (el) {
           return el.section_id == key 
         });
-        drawGraph(currentFeatureData[0])
+        drawGraph(currentFeatureData[0],key)
       }
     }
 
@@ -1286,31 +1355,31 @@ function getDataForGraph(key){
         currentFeatureData = allRoutesData.filter(function (el) {
           return el.segment_id == key && el.direction_1 == roadDirection && el.month == 0;
         });
-        drawYearlyGraph(currentFeatureData);
+        drawYearlyGraph(currentFeatureData,key);
       }
       else if($('input[type="radio"][name="optradio"]:checked').val()  == 'monthly'){
         currentFeatureData = allRoutesData.filter(function (el) {
           return el.segment_id == key && el.year == $('#year-value').val() && el.direction_1 == roadDirection && el.month != 0;
         });
-        drawMonthlyGraph(currentFeatureData);
+        drawMonthlyGraph(currentFeatureData,key);
       }
       else if($('input[type="radio"][name="optradio"]:checked').val()  == 'daily'){
         currentFeatureData = allRoutesData.filter(function (el) {
           return el.segment_id == key && el.direction_1 == roadDirection;
         });
-        drawDailyGraph(currentFeatureData);
+        drawDailyGraph(currentFeatureData,key);
       }
       else if($('input[type="radio"][name="optradio"]:checked').val()  == 'hourly'){
          currentFeatureData = filteredData.filter(function (el) {
           return el.segment_id == key 
         });
-        drawHourlyGraph(currentFeatureData[0]);
+        drawHourlyGraph(currentFeatureData[0],key);
       }
       else{
         currentFeatureData = filteredData.filter(function (el) {
           return el.segment_id == key 
         });
-        drawGraph(currentFeatureData[0]);
+        drawGraph(currentFeatureData[0],key);
       }
     }
         console.log(currentFeatureData);
@@ -1319,7 +1388,7 @@ function getDataForGraph(key){
       }
     }
 
-    function drawHourlyGraph(data){
+    function drawHourlyGraph(data,key){
       let chartData = [];
       for(let i = 1; i < 25; i++){
         console.log(i);
@@ -1357,8 +1426,13 @@ function getDataForGraph(key){
       var chart = AmCharts.makeChart("chartdiv", {
         "type": "serial",
         "theme": "light",
+        "titles": [{
+        "text": currentSelectedSpatial+' Id: ' + key + ' | Date: '+timestamp.substring(8,6)+'-'+timestamp.substring(6,4)+'-'+timestamp.substring(4,0) + ' | Hour: ' + selectedTime ,
+        "size": 12
+        }],
         "backgroundColor": "#DCDCDC",
         "dataProvider": chartData,
+        "minMarginBottom": 60,
         "valueAxes": [{
           "id":"v1",
           "gridColor": "#FFFFFF",
@@ -1415,11 +1489,14 @@ function getDataForGraph(key){
         //"labelOffset": 5,
         "gridAlpha": 0.1
       },
-      "legend": {}
+      "legend": {
+        "position": "right",
+        "spacing": 20,
+      }
       });
     }
 
-    function drawDailyGraph(data){
+    function drawDailyGraph(data,key){
       console.log(data);
       // let labels = [];
       // let ttiValues = [];
@@ -1429,6 +1506,7 @@ function getDataForGraph(key){
         '1-06','2-06','3-06','4-06','5-06','6-06','7-06','8-06','9-06','10-06','11-06','12-06','13-06','14-06','15-06','16-06','17-06','18-06','19-06','20-06','21-06','22-06','23-06','24-06','25-06','26-06','27-06','28-06','29-06','30-06'
       ]
       let i = 0;
+      data = data.slice(0, 30);
       data.forEach( element => {
         console.log(element['averageTTI']);
 
@@ -1445,12 +1523,16 @@ function getDataForGraph(key){
         i++;
       });
 
-
       var chart = AmCharts.makeChart("chartdiv", {
   "type": "serial",
   "theme": "light",
+  "titles": [{
+        "text": currentSelectedSpatial+' Id: '+key+' | '+'Date: '+timestamp.substring(8,6)+'-'+timestamp.substring(6,4)+'-'+timestamp.substring(4,0),
+        "size": 12
+  }],
   "backgroundColor": "#DCDCDC",
   "dataProvider": chartData,
+   "minMarginBottom": 60,
   "valueAxes": [{
     "id":"v1",
     "gridColor": "#FFFFFF",
@@ -1507,7 +1589,10 @@ function getDataForGraph(key){
   //"labelOffset": 5,
   "gridAlpha": 0.1
 },
-"legend": {}
+"legend": {
+  "position": "right",
+  "spacing": 20,
+}
 });
       // for( let i = 0; i < labels.length ; i++){
       //   chartData.push({
@@ -1518,12 +1603,10 @@ function getDataForGraph(key){
       // }
     }
 
-    function drawGraph(data){
+    function drawGraph(data,key){
 
       console.log(data);
-      
       let labels = Object.keys(data);
-
       labels = labels.slice(2, 98);
 // console.log(labels);
 labels = labels.map(function (x) { 
@@ -1540,12 +1623,10 @@ let speedValues = values.slice(100, 196);
 //   ttivalues = values.slice(2, 98);
 //   speedValues = values.slice(104, 200);
 // }
-
 // if($('input[type="radio"][name="optradio"]:checked').val() == 'daily'){
 //   ttivalues = values[];
 //   speedValues = values[];
 // }
-
 // console.log(values);
 var intValues = ttivalues.map(function (x) { 
   return parseFloat(x); 
@@ -1563,11 +1644,17 @@ for( let i = 0; i < labels.length ; i++){
     'speed' : intSpeedValues[i]
   })
 }
+
 var chart = AmCharts.makeChart("chartdiv", {
   "type": "serial",
   "theme": "light",
+  "titles": [{
+    "text": currentSelectedSpatial+' Id: ' + key + ' Date: ' +timestamp.substring(8,6)+'-'+timestamp.substring(6,4)+'-'+timestamp.substring(4,0) + ' Time: ' + selectedTime ,
+    "size": 12
+  }],
   "backgroundColor": "#DCDCDC",
   "dataProvider": chartData,
+  "minMarginBottom": 60,
   "valueAxes": [{
     "id":"v1",
     "gridColor": "#FFFFFF",
@@ -1624,11 +1711,14 @@ var chart = AmCharts.makeChart("chartdiv", {
   //"labelOffset": 5,
   "gridAlpha": 0.1
 },
-"legend": {}
+"legend": {
+  "position": "right",
+  "spacing": 20,
+}
 });
 }
 
-    function drawYearlyGraph(data){
+    function drawYearlyGraph(data,key){
       console.log(data);
       // let labels = [];
       // let ttiValues = [];
@@ -1653,13 +1743,16 @@ var chart = AmCharts.makeChart("chartdiv", {
         });
         i++;
       });
-
-
       var chart = AmCharts.makeChart("chartdiv", {
   "type": "serial",
   "theme": "light",
+  "titles": [{
+    "text": currentSelectedSpatial+' Id: ' + key + ' | Year: ' + data[1].year,
+    "size": 12
+  }],
   "backgroundColor": "#DCDCDC",
   "dataProvider": chartData,
+  "minMarginBottom": 60,
   "valueAxes": [{
     "id":"v1",
     "gridColor": "#FFFFFF",
@@ -1716,18 +1809,14 @@ var chart = AmCharts.makeChart("chartdiv", {
   //"labelOffset": 5,
   "gridAlpha": 0.1
 },
-"legend": {}
+"legend": {
+  "position": "right",
+  "spacing": 20,
+}
 });
-      // for( let i = 0; i < labels.length ; i++){
-      //   chartData.push({
-      //     'time': labels[i],
-      //     'value': element['averageTTI'],
-      //     'speed' : element['v_avg']
-      //   })
-      // }
     }
 
-       function drawMonthlyGraph(data){
+       function drawMonthlyGraph(data,key){
       console.log(data);
       // let labels = [];
       // let ttiValues = [];
@@ -1758,13 +1847,18 @@ var chart = AmCharts.makeChart("chartdiv", {
         });
         i++;
       });
-
-
+       let y =  $('#year-value').val();
+      let m = $('#month-value').val();
       var chart = AmCharts.makeChart("chartdiv", {
   "type": "serial",
   "theme": "light",
+  "titles": [{
+    "text": currentSelectedSpatial+' Id: ' + key + ' | Year: ' +data[1].year+' | Month: '+m,
+    "size": 12
+  }],
   "backgroundColor": "#DCDCDC",
   "dataProvider": chartData,
+  "minMarginBottom": 60,
   "valueAxes": [{
     "id":"v1",
     "gridColor": "#FFFFFF",
@@ -1821,15 +1915,11 @@ var chart = AmCharts.makeChart("chartdiv", {
   //"labelOffset": 5,
   "gridAlpha": 0.1
 },
-"legend": {}
+"legend": {
+  "position": "right",
+  "spacing": 20,
+}
 });
-      // for( let i = 0; i < labels.length ; i++){
-      //   chartData.push({
-      //     'time': labels[i],
-      //     'value': element['averageTTI'],
-      //     'speed' : element['v_avg']
-      //   })
-      // }
     }
 
 function closeGraph(){
