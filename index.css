@@ -440,7 +440,7 @@ input[type=range]:focus::-ms-fill-upper {
 
 .layout3{
     text-align: center;
-    margin: 0px;
+    margin: 5px;
     padding: 0px;
     font-size: 12px;
     vertical-align: middle;
@@ -476,4 +476,9 @@ input[type=range]:focus::-ms-fill-upper {
 .button2:hover {
   background-color: #008CBA;
   color: white;
+}
+
+.btn {
+  border: 2px solid #008CBA;
+  background-color: #98AFC7;
 }

@@ -400,11 +400,11 @@ function changelegend(){
 var deckgl = new deck.DeckGL({
   initialViewState: {
     longitude: 13.0385674,
-    latitude: 47.8243466,
+    latitude: 47.8013466,
     zoom: 13,
     pitch: 0,
     minZoom: 2,
-    maxZoom: 18
+    maxZoom: 20
   },
   controller: true,
   mapboxApiAccessToken: 'pk.eyJ1IjoiYXJzbGFuYXNsYW0iLCJhIjoiY2p3eHluaTc0MDY2bTN5dGE5MmFreDVhNiJ9.m7-X9A_ArfFo7elXXyaSIQ',
@@ -1190,7 +1190,7 @@ function getTooltip(info) {
             tti = currentFeatureData[0][timeInterval.name];
             speed = currentFeatureData[0][timeInterval.speed];
 
-            infoString = `TTI : ${tti} , Speed : ${speed} , Date : ${currentFeatureData[0]['timestamp']} , ${timeInterval.start} to ${timeInterval.end}`;
+            infoString = `<big>TTI : ${tti} , Speed : ${speed}<br>Date : ${currentFeatureData[0]['timestamp']} , Interval: ${timeInterval.start} to ${timeInterval.end}</big>`;
           }
           else if($('input[type="radio"][name="optradio"]:checked').val() == 'hourly'){
             let ttiValueArray = [];
@@ -1215,23 +1215,23 @@ function getTooltip(info) {
             tti =  avg;
             hours = hour;
             speed = speedAvg;
-            infoString = `TTI : ${tti} ,Speed : ${speed}, Date : ${datadate} , ${hours} hrs`;
+            infoString = `<big>TTI : ${tti} , Speed : ${speed}<br>Date : ${datadate} , ${hours}:00 hrs </big>`;
           }
           else if($('input[type="radio"][name="optradio"]:checked').val() == 'daily'){
             tti =currentFeatureData[0]['averageTTI'];
             speed =currentFeatureData[0]['v_avg'];
-            infoString = `TTI : ${tti} ,Speed : ${speed} , Date : ${currentFeatureData[0]['timestamp']} `;
+            infoString = `<big>TTI : ${tti} , Speed : ${speed}<br>Date : ${currentFeatureData[0]['timestamp']} </big>`;
 
           }
           else if ($('input[type="radio"][name="optradio"]:checked').val() == 'yearly'){
             tti =currentFeatureData[0]['TTI'];
             speed =currentFeatureData[0]['v'];
-            infoString = `TTI : ${tti} ,Speed : ${speed} , Year : ${$('#year-value').val()} `;
+            infoString = `<big>TTI : ${tti} , Speed : ${speed}<br>Year : ${$('#year-value').val()} </big>`;
           }
           else if ($('input[type="radio"][name="optradio"]:checked').val() == 'monthly'){
             tti =currentFeatureData[0]['TTI'];
             speed =currentFeatureData[0]['v'];
-            infoString = `AVG TTI : ${tti} ,Speed : ${speed} , Year : ${$('#year-value').val()} Month: ${$('#month-value').val()} `;
+            infoString = `<big>AVG TTI : ${tti} , Speed : ${speed}<br>Year : ${$('#year-value').val()} , Month: ${$('#month-value').val()} </big>`;
           }
 
          // f = currentFeatureData[0][timeInterval.name];
@@ -1253,10 +1253,10 @@ function getTooltip(info) {
     content = `<big>Route Id : ${props.route_id} </big>`;
   }
   else if ($('input[type="radio"][name="spatioradio"]:checked').val() == 'section'){
-    content = `<big>Section Id : ${props.section_id} </big>`;
+    content = `<big>Section Id : ${props.section_id} (Route Id : ${props.route_id}) </big>`;
   }
   else{
-    content = `<big>Segment Id :${props.segment_id} </big>`;
+    content = `<big>Segment Id :${props.segment_id} (Route Id : ${props.route_id}) </big>`;
   }
   if (infoString) {
 //       content += `
@@ -1310,6 +1310,7 @@ function getDataForGraph(key){
         drawHourlyGraph(currentFeatureData[0],key);
       }
       else{
+        timeInterval = getDateInterval(selectedTime);
         currentFeatureData = filteredData.filter(function (el) {
           return el.route_id == key 
         });
@@ -1343,6 +1344,7 @@ function getDataForGraph(key){
         drawHourlyGraph(currentFeatureData[0],key);
       }
       else{
+        timeInterval = getDateInterval(selectedTime);
         currentFeatureData = filteredData.filter(function (el) {
           return el.section_id == key 
         });
@@ -1376,6 +1378,7 @@ function getDataForGraph(key){
         drawHourlyGraph(currentFeatureData[0],key);
       }
       else{
+        timeInterval = getDateInterval(selectedTime);
         currentFeatureData = filteredData.filter(function (el) {
           return el.segment_id == key 
         });
@@ -1649,7 +1652,7 @@ var chart = AmCharts.makeChart("chartdiv", {
   "type": "serial",
   "theme": "light",
   "titles": [{
-    "text": currentSelectedSpatial+' Id: ' + key + ' Date: ' +timestamp.substring(8,6)+'-'+timestamp.substring(6,4)+'-'+timestamp.substring(4,0) + ' Time: ' + selectedTime ,
+    "text": currentSelectedSpatial+' Id: ' + key + ' | Date: ' +timestamp.substring(8,6)+'-'+timestamp.substring(6,4)+'-'+timestamp.substring(4,0) + ' | Time: ' + timeInterval.start + ' to ' + timeInterval.end, 
     "size": 12
   }],
   "backgroundColor": "#DCDCDC",
